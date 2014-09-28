@@ -1,4 +1,4 @@
-package com.touhiDroid.backgroundgpsgetter;
+package com.touhiDroid.backgroundgpsgetter.model;
 
 import org.json.JSONObject;
 

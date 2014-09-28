@@ -1,4 +1,4 @@
-package com.touhiDroid.backgroundgpsgetter;
+package com.touhiDroid.backgroundgpsgetter.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,6 +25,9 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.touhiDroid.backgroundgpsgetter.Constants;
+import com.touhiDroid.backgroundgpsgetter.model.ServerResponse;
 
 import android.util.Log;
 

@@ -23,8 +23,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.touhiDroid.backgroundgpsgetter.Constants;
-import com.touhiDroid.backgroundgpsgetter.JsonParser;
-import com.touhiDroid.backgroundgpsgetter.ServerResponse;
+import com.touhiDroid.backgroundgpsgetter.model.ServerResponse;
+import com.touhiDroid.backgroundgpsgetter.parser.JsonParser;
 
 /**
  * @author Touhid
@@ -153,7 +153,10 @@ public class GPSSenderService extends Service implements LocationListener {
 							longitude = location.getLongitude();
 							locationStr = "Latitude: " + latitude + ", Longitude: " + longitude;
 							Log.d(TAG, "Current Location : " + locationStr);
-							new UpdateGeoCoordinate().execute(latitude, longitude, 01d, 5001d);
+							// TODO un-comment to send the GPS position to a
+							// server
+							// new UpdateGeoCoordinate().execute(latitude,
+							// longitude, 01d, 5001d);
 						} catch (Exception e) {
 						}
 					}
@@ -248,6 +251,7 @@ public class GPSSenderService extends Service implements LocationListener {
 		Log.d(TAG, "onProviderDisabled : " + provider);
 	}
 
+	@SuppressWarnings("unused")
 	private class UpdateGeoCoordinate extends AsyncTask<Double, Void, JSONObject> {
 
 		private final String URL = "";// TODO Set
