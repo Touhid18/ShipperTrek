@@ -5,11 +5,12 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+
+import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -24,15 +25,16 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.google.android.gcm.GCMRegistrar;
-import com.touhiDroid.backgroundgpsgetter.R;
+import com.touhiDroid.backgroundgpsgetter.model.ServerResponse;
+import com.touhiDroid.backgroundgpsgetter.parser.JsonParser;
 
-public class AppController extends Application {
+public class GCMController extends Application {
 
 	private final int MAX_ATTEMPTS = 5;
 	private final int BACKOFF_MILLI_SECONDS = 2000;
 	private final Random random = new Random();
 	private static Context tContext;
-	
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -40,16 +42,16 @@ public class AppController extends Application {
 	}
 
 	// Register this account with the server.
-	public void register(final Context context, String name, String email, final String regId) {
+	public void register(final Context context, final int id, final String deviceId, final String regId) {
 
 		Log.i(Constants.TAG, "registering device (regId = " + regId + ")");
 
 		String serverUrl = Constants.SERVER_URL;
 
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("regId", regId);
-		params.put("name", name);
-		params.put("email", email);
+		// Map<String, String> params = new HashMap<String, String>();
+		// params.put("regId", regId);
+		// params.put("name", name);
+		// params.put("email", email);
 
 		long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
 
@@ -65,7 +67,8 @@ public class AppController extends Application {
 				displayMessageOnScreen(context, context.getString(R.string.server_registering, i, MAX_ATTEMPTS));
 
 				// Post registration values to web server
-				post(serverUrl, params);
+				// post(serverUrl, params);
+				postToServer(serverUrl, id, deviceId, regId);
 
 				GCMRegistrar.setRegisteredOnServer(context, true);
 
@@ -74,7 +77,7 @@ public class AppController extends Application {
 				displayMessageOnScreen(context, message);
 
 				return;
-			} catch (IOException e) {
+			} catch (Exception e) {
 
 				// Here we are simplifying and retrying on any error; in a real
 				// application, it should retry only on unrecoverable errors
@@ -101,11 +104,24 @@ public class AppController extends Application {
 				backoff *= 2;
 			}
 		}
-
 		String message = context.getString(R.string.server_register_error, MAX_ATTEMPTS);
-
 		// Send Broadcast to Show message on screen
 		displayMessageOnScreen(context, message);
+	}
+
+	private void postToServer(String serverUrl, int id, String deviceId, String regId) throws Exception{
+		JsonParser jsonParser = new JsonParser();
+		JSONObject jObj = new JSONObject();
+		jObj.put("id", id);
+		jObj.put("deviceId",deviceId);
+		jObj.put("gcmkey",regId);
+		String jStr = jObj.toString();
+		ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_PUT, serverUrl, null, jStr,
+				"");// TODO Token 
+		if(response.getStatus()==200){
+			Log.d("GCMController","GCM data saved to server successfully");
+		}
+
 	}
 
 	// Unregister this account/device pair within the server.
@@ -114,15 +130,15 @@ public class AppController extends Application {
 		Log.i(Constants.TAG, "unregistering device (regId = " + regId + ")");
 
 		String serverUrl = Constants.SERVER_URL + "/unregister";
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("regId", regId);
+		// Map<String, String> params = new HashMap<String, String>();
+		// params.put("regId", regId);
 
 		try {
-			post(serverUrl, params);
+			postToServer(serverUrl, 1, "", regId);
 			GCMRegistrar.setRegisteredOnServer(context, false);
 			String message = context.getString(R.string.server_unregistered);
 			displayMessageOnScreen(context, message);
-		} catch (IOException e) {
+		} catch (Exception e) {
 
 			// At this point the device is unregistered from GCM, but still
 			// registered in the our server.
@@ -136,13 +152,12 @@ public class AppController extends Application {
 	}
 
 	// Issue a POST request to the server.
+	@SuppressWarnings("unused")
 	private static void post(String endpoint, Map<String, String> params) throws IOException {
 
 		URL url;
 		try {
-
 			url = new URL(endpoint);
-
 		} catch (MalformedURLException e) {
 			throw new IllegalArgumentException("invalid url: " + endpoint);
 		}
@@ -185,8 +200,7 @@ public class AppController extends Application {
 			int status = conn.getResponseCode();
 
 			// If response is not success
-			if (status != 200) {
-
+			if (status != 200) { // TODO Do this only for status==503
 				throw new IOException("Post failed with error code " + status);
 			}
 		} finally {
@@ -273,6 +287,6 @@ public class AppController extends Application {
 
 	public static String getDeviceIMEI() {
 		TelephonyManager telephonyManager = (TelephonyManager) tContext.getSystemService(Context.TELEPHONY_SERVICE);
-		return telephonyManager.getDeviceId()+"";
+		return telephonyManager.getDeviceId() + "";
 	}
 }

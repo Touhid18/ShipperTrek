@@ -9,7 +9,7 @@ import android.content.Intent;
 import android.util.Log;
 
 /**
- * @author Dell
+ * @author Touhid
  * 
  */
 public class LocationUpdateReceiver extends BroadcastReceiver {
@@ -23,6 +23,7 @@ public class LocationUpdateReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		Log.d("LocationUpdateReceiver", "onReceive");
+		context.startService(new Intent(context, GPSSenderService.class));
 	}
 
 }

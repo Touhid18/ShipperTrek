@@ -15,7 +15,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 
 	private static final String TAG = "GCMIntentService";
 
-	private AppController aController = null;
+	private GCMController aController = null;
 
 	public GCMIntentService() {
 		// Call extended class Constructor GCMBaseIntentService
@@ -31,11 +31,12 @@ public class GCMIntentService extends GCMBaseIntentService {
 		// Get Global Controller Class object (see application tag in
 		// AndroidManifest.xml)
 		if (aController == null)
-			aController = (AppController) getApplicationContext();
+			aController = (GCMController) getApplicationContext();
 
 		aController.displayMessageOnScreen(context, "Your device registred with GCM");
 		Log.d("NAME", MainActivity.name);
-		aController.register(context, MainActivity.name, MainActivity.email, registrationId);
+		 // TODO send ID & device ID instead of name / email
+		aController.register(context, 1, MainActivity.email, registrationId);
 	}
 
 	/**
@@ -44,7 +45,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 	@Override
 	protected void onUnregistered(Context context, String registrationId) {
 		if (aController == null)
-			aController = (AppController) getApplicationContext();
+			aController = (GCMController) getApplicationContext();
 		Log.i(TAG, "Device unregistered");
 		aController.displayMessageOnScreen(context, getString(R.string.gcm_unregistered));
 		aController.unregister(context, registrationId);
@@ -57,7 +58,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 	protected void onMessage(Context context, Intent intent) {
 
 		if (aController == null)
-			aController = (AppController) getApplicationContext();
+			aController = (GCMController) getApplicationContext();
 
 		Log.i(TAG, "Received message");
 		String message = intent.getExtras().getString("price");
@@ -74,7 +75,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 	protected void onDeletedMessages(Context context, int total) {
 
 		if (aController == null)
-			aController = (AppController) getApplicationContext();
+			aController = (GCMController) getApplicationContext();
 
 		Log.i(TAG, "Received deleted messages notification");
 		String message = getString(R.string.gcm_deleted, total);
@@ -90,7 +91,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 	public void onError(Context context, String errorId) {
 
 		if (aController == null)
-			aController = (AppController) getApplicationContext();
+			aController = (GCMController) getApplicationContext();
 
 		Log.i(TAG, "Received error: " + errorId);
 		aController.displayMessageOnScreen(context, getString(R.string.gcm_error, errorId));
@@ -100,7 +101,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 	protected boolean onRecoverableError(Context context, String errorId) {
 
 		if (aController == null)
-			aController = (AppController) getApplicationContext();
+			aController = (GCMController) getApplicationContext();
 
 		// log message
 		Log.i(TAG, "Received recoverable error: " + errorId);

@@ -19,7 +19,7 @@ import com.touhiDroid.backgroundgpsgetter.service.GPSSenderService;
 
 public class MainActivity extends Activity {
 
-	private AppController aController;
+	private GCMController aController;
 	// Asyntask
 	private AsyncTask<Void, Void, Void> mRegisterTask;
 
@@ -46,7 +46,7 @@ public class MainActivity extends Activity {
 	private void initiateGCMRegistrationProcess() {
 		// Get Global Controller Class object (see application tag in
 		// AndroidManifest.xml)
-		aController = (AppController) getApplicationContext();
+		aController = (GCMController) getApplicationContext();
 
 		// Check if Internet Connection present
 		if (!aController.isConnectingToInternet()) {
@@ -151,7 +151,8 @@ public class MainActivity extends Activity {
 						// On server creates a new user
 						Log.e(Constants.TAG, "mRegisterTask : doInBackground : registering: name=" + name + ", email"
 								+ email);
-						aController.register(context, name, email, regId);
+						// TODO ID & device ID to set
+						aController.register(context, 1, email, regId);
 
 						return null;
 					}
