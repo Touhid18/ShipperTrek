@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.google.android.gcm.GCMBaseIntentService;
 import com.touhiDroid.backgroundgpsgetter.R;
+import com.touhiDroid.backgroundgpsgetter.utils.AppConstants;
 
 public class GCMIntentService extends GCMBaseIntentService {
 
@@ -19,7 +20,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 
 	public GCMIntentService() {
 		// Call extended class Constructor GCMBaseIntentService
-		super(Constants.GOOGLE_SENDER_ID);
+		super(AppConstants.GOOGLE_SENDER_ID);
 	}
 
 	/**
@@ -28,6 +29,11 @@ public class GCMIntentService extends GCMBaseIntentService {
 	@Override
 	protected void onRegistered(Context context, String registrationId) {
 		Log.i(TAG, "Device registered: regId = " + registrationId);
+		Log.e(TAG, "Device registered: regId = " + registrationId);
+		Log.i(TAG, "Device registered: regId = " + registrationId);
+		Log.e(TAG, "Device registered: regId = " + registrationId);
+		Log.i(TAG, "Device registered: regId = " + registrationId);
+		Log.e(TAG, "Device registered: regId = " + registrationId);
 		// Get Global Controller Class object (see application tag in
 		// AndroidManifest.xml)
 		if (aController == null)

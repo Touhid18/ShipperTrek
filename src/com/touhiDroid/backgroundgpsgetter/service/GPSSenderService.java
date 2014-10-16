@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import android.app.ProgressDialog;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
@@ -22,9 +23,9 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.touhiDroid.backgroundgpsgetter.Constants;
 import com.touhiDroid.backgroundgpsgetter.model.ServerResponse;
 import com.touhiDroid.backgroundgpsgetter.parser.JsonParser;
+import com.touhiDroid.backgroundgpsgetter.utils.AppConstants;
 
 /**
  * @author Touhid
@@ -32,13 +33,10 @@ import com.touhiDroid.backgroundgpsgetter.parser.JsonParser;
  */
 public class GPSSenderService extends Service implements LocationListener {
 
-	private final int MIN_DISTANCE_CHANGE_FOR_UPDATES = 10;
-	private final int MIN_TIME_BW_UPDATES = 5 * 1000; // 5 sec.
-	private final int GPS_UPDATE_INTERVAL = 10 * 1000; // 10 sec.
-
 	private final String TAG = this.getClass().getSimpleName();
 
-	private ProgressDialog pDialog;
+	private static ProgressDialog pDialog;
+	private static Context tContext;
 
 	// private ScheduledThreadPoolExecutor schThPoolExecutor;
 	private String locationStr = "";
@@ -90,6 +88,7 @@ public class GPSSenderService extends Service implements LocationListener {
 	@Override
 	public void onCreate() {
 		Log.d(TAG, "onCreate inside");
+		tContext = getApplicationContext();
 		// Start up the thread running the service. Note that we create a
 		// separate thread because the service normally runs in the process's
 		// main thread, which we don't want to block. We also make it
@@ -107,7 +106,9 @@ public class GPSSenderService extends Service implements LocationListener {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+		if (tContext == null)
+			tContext = getApplicationContext();
+		Toast.makeText(tContext, "service starting", Toast.LENGTH_SHORT).show();
 		Log.d(TAG, "service starting");
 
 		// For each start request, send a message to start a job and deliver the
@@ -153,17 +154,15 @@ public class GPSSenderService extends Service implements LocationListener {
 							longitude = location.getLongitude();
 							locationStr = "Latitude: " + latitude + ", Longitude: " + longitude;
 							Log.d(TAG, "Current Location : " + locationStr);
-							// TODO un-comment to send the GPS position to a
-							// server
-							// new UpdateGeoCoordinate().execute(latitude,
-							// longitude, 01d, 5001d);
+							// TODO send the GPS position to a server
+							new UpdateGeoCoordinate().execute(latitude, longitude, 01d, 5001d);
 						} catch (Exception e) {
 						}
 					}
 				});
 			}
 		};
-		timer.schedule(doAsynchronousTask, 0, GPS_UPDATE_INTERVAL);
+		timer.schedule(doAsynchronousTask, 0, AppConstants.GPS_UPDATE_INTERVAL);
 
 		// If we get killed, after returning from here, restart
 		return START_STICKY;
@@ -195,7 +194,8 @@ public class GPSSenderService extends Service implements LocationListener {
 						// First get location from Network Provider
 						if (isNetworkEnabled) {
 							locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-									MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, GPSSenderService.this);
+									AppConstants.MIN_TIME_BW_UPDATE_REQUEST, AppConstants.MIN_DISTANCE_CHANGE_FOR_UPDATES,
+									GPSSenderService.this);
 							Log.d("Network", "Network");
 							if (locationManager != null) {
 								location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -209,7 +209,8 @@ public class GPSSenderService extends Service implements LocationListener {
 						if (isGPSEnabled) {
 							if (location == null) {
 								locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-										MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, GPSSenderService.this);
+										AppConstants.MIN_TIME_BW_UPDATE_REQUEST, AppConstants.MIN_DISTANCE_CHANGE_FOR_UPDATES,
+										GPSSenderService.this);
 								Log.d("GPS Enabled", "GPS Enabled");
 								if (locationManager != null) {
 									location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -251,11 +252,10 @@ public class GPSSenderService extends Service implements LocationListener {
 		Log.d(TAG, "onProviderDisabled : " + provider);
 	}
 
-	@SuppressWarnings("unused")
-	private class UpdateGeoCoordinate extends AsyncTask<Double, Void, JSONObject> {
-
-		private final String URL = "";// TODO Set
+	private static class UpdateGeoCoordinate extends AsyncTask<Double, Void, JSONObject> {
 		private JsonParser jsonParser;
+		private static boolean isRunning = false;
+		private static String TAG_TASK = "UpdateGeoCoordinate";
 
 		@Override
 		protected void onPreExecute() {
@@ -264,7 +264,7 @@ public class GPSSenderService extends Service implements LocationListener {
 				if (jsonParser == null)
 					jsonParser = new JsonParser();
 				if (pDialog == null)
-					pDialog = new ProgressDialog(getApplicationContext());
+					pDialog = new ProgressDialog(tContext);
 				if (!pDialog.isShowing()) {
 					pDialog.setMessage("Deciding the issue ...");
 					pDialog.setCancelable(false);
@@ -272,12 +272,16 @@ public class GPSSenderService extends Service implements LocationListener {
 					pDialog.show();
 				}
 			} catch (Exception e) {
-				Log.e(TAG, "Exception inside DecideNotification:onPreExecute :: \n" + e.getMessage());
+				Log.e(TAG_TASK, "Exception inside DecideNotification:onPreExecute :: \n" + e.getMessage());
 			}
 		}
 
 		@Override
 		protected JSONObject doInBackground(Double... params) {
+			if (isRunning == true) {
+				Log.e(TAG_TASK, "");
+				return null;
+			}
 			double latti = params[0];
 			double longi = params[1];
 			double id = params[2];
@@ -293,8 +297,9 @@ public class GPSSenderService extends Service implements LocationListener {
 				e.printStackTrace();
 			}
 
-			ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_POST, URL, null,
-					jObj.toString(), "");// TODO Access-token
+			// TODO Access-token
+			ServerResponse response = jsonParser.retrieveServerData(AppConstants.REQUEST_TYPE_POST,
+					AppConstants.URL_BASE, null, jObj.toString(), "");
 			if (response.getStatus() == 200) {
 				Log.d(">>>><<<<", "success in retrieving notifications.");
 				JSONObject responseObj = response.getjObj();
@@ -310,13 +315,13 @@ public class GPSSenderService extends Service implements LocationListener {
 				try {
 					String status = responseObj.getString("status");
 					if (status.equals("OK")) {
-						Log.d(TAG, "Sattus is ok");
+						Log.d(TAG_TASK, "Status is ok");
 						// TODO handle success
 					} else {
 						// TODO handle null-array
 					}
 				} catch (JSONException e) {
-					Log.w(TAG, "Malformed data received!");
+					Log.w(TAG_TASK, "Malformed data received!");
 					e.printStackTrace();
 				}
 			}

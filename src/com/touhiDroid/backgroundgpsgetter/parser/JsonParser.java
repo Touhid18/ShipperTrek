@@ -26,8 +26,8 @@ import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.touhiDroid.backgroundgpsgetter.Constants;
 import com.touhiDroid.backgroundgpsgetter.model.ServerResponse;
+import com.touhiDroid.backgroundgpsgetter.utils.AppConstants;
 
 import android.util.Log;
 
@@ -67,7 +67,7 @@ public class JsonParser {
 			DefaultHttpClient httpClient = new DefaultHttpClient();
 			HttpResponse httpResponse = null;
 
-			if (reqType == Constants.REQUEST_TYPE_GET) {
+			if (reqType == AppConstants.REQUEST_TYPE_GET) {
 				HttpGet httpGet = new HttpGet(url);
 				httpGet.setHeader("Content-Type", "application/json");
 				httpGet.setHeader("Accept", "application/json");
@@ -77,7 +77,7 @@ public class JsonParser {
 
 				httpResponse = httpClient.execute(httpGet);
 
-			} else if (reqType == Constants.REQUEST_TYPE_POST) {
+			} else if (reqType == AppConstants.REQUEST_TYPE_POST) {
 				HttpPost httpPost = new HttpPost(url);
 				httpPost.setHeader("Content-Type", "application/json");
 				httpPost.setHeader("Accept", "application/json");
@@ -90,7 +90,7 @@ public class JsonParser {
 				httpPost.setEntity(se);
 
 				httpResponse = httpClient.execute(httpPost);
-			} else if (reqType == Constants.REQUEST_TYPE_PUT) {
+			} else if (reqType == AppConstants.REQUEST_TYPE_PUT) {
 				HttpPut httpPut = new HttpPut(url);
 				httpPut.setHeader("Content-Type", "application/json");
 				httpPut.setHeader("Accept", "application/json");
@@ -105,7 +105,7 @@ public class JsonParser {
 				}
 
 				httpResponse = httpClient.execute(httpPut);
-			} else if (reqType == Constants.REQUEST_TYPE_DELETE) {
+			} else if (reqType == AppConstants.REQUEST_TYPE_DELETE) {
 				HttpDelete httpDelete = new HttpDelete(url);
 				httpDelete.setHeader("Content-Type", "application/json");
 				httpDelete.setHeader("Accept", "application/json");

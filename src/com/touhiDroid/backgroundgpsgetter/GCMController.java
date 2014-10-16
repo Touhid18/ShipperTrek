@@ -27,6 +27,7 @@ import android.util.Log;
 import com.google.android.gcm.GCMRegistrar;
 import com.touhiDroid.backgroundgpsgetter.model.ServerResponse;
 import com.touhiDroid.backgroundgpsgetter.parser.JsonParser;
+import com.touhiDroid.backgroundgpsgetter.utils.AppConstants;
 
 public class GCMController extends Application {
 
@@ -44,9 +45,9 @@ public class GCMController extends Application {
 	// Register this account with the server.
 	public void register(final Context context, final int id, final String deviceId, final String regId) {
 
-		Log.i(Constants.TAG, "registering device (regId = " + regId + ")");
+		Log.i(AppConstants.TAG, "registering device (regId = " + regId + ")");
 
-		String serverUrl = Constants.SERVER_URL;
+		String serverUrl = AppConstants.SERVER_URL;
 
 		// Map<String, String> params = new HashMap<String, String>();
 		// params.put("regId", regId);
@@ -60,7 +61,7 @@ public class GCMController extends Application {
 		// times.
 		for (int i = 1; i <= MAX_ATTEMPTS; i++) {
 
-			Log.d(Constants.TAG, "Attempt #" + i + " to register");
+			Log.d(AppConstants.TAG, "Attempt #" + i + " to register");
 
 			try {
 				// Send Broadcast to Show message on screen
@@ -83,19 +84,19 @@ public class GCMController extends Application {
 				// application, it should retry only on unrecoverable errors
 				// (like HTTP error code 503).
 
-				Log.e(Constants.TAG, "Failed to register on attempt " + i + ":" + e);
+				Log.e(AppConstants.TAG, "Failed to register on attempt " + i + ":" + e);
 
 				if (i == MAX_ATTEMPTS) {
 					break;
 				}
 				try {
 
-					Log.d(Constants.TAG, "Sleeping for " + backoff + " ms before retry");
+					Log.d(AppConstants.TAG, "Sleeping for " + backoff + " ms before retry");
 					Thread.sleep(backoff);
 
 				} catch (InterruptedException e1) {
 					// Activity finished before we complete - exit.
-					Log.d(Constants.TAG, "Thread interrupted: abort remaining retries!");
+					Log.d(AppConstants.TAG, "Thread interrupted: abort remaining retries!");
 					Thread.currentThread().interrupt();
 					return;
 				}
@@ -116,7 +117,7 @@ public class GCMController extends Application {
 		jObj.put("deviceId",deviceId);
 		jObj.put("gcmkey",regId);
 		String jStr = jObj.toString();
-		ServerResponse response = jsonParser.retrieveServerData(Constants.REQUEST_TYPE_PUT, serverUrl, null, jStr,
+		ServerResponse response = jsonParser.retrieveServerData(AppConstants.REQUEST_TYPE_PUT, serverUrl, null, jStr,
 				"");// TODO Token 
 		if(response.getStatus()==200){
 			Log.d("GCMController","GCM data saved to server successfully");
@@ -127,9 +128,9 @@ public class GCMController extends Application {
 	// Unregister this account/device pair within the server.
 	public void unregister(final Context context, final String regId) {
 
-		Log.i(Constants.TAG, "unregistering device (regId = " + regId + ")");
+		Log.i(AppConstants.TAG, "unregistering device (regId = " + regId + ")");
 
-		String serverUrl = Constants.SERVER_URL + "/unregister";
+		String serverUrl = AppConstants.SERVER_URL + "/unregister";
 		// Map<String, String> params = new HashMap<String, String>();
 		// params.put("regId", regId);
 
@@ -176,7 +177,7 @@ public class GCMController extends Application {
 
 		String body = bodyBuilder.toString();
 
-		Log.v(Constants.TAG, "Posting '" + body + "' to " + url);
+		Log.v(AppConstants.TAG, "Posting '" + body + "' to " + url);
 
 		byte[] bytes = body.getBytes();
 
@@ -229,8 +230,8 @@ public class GCMController extends Application {
 	// Notifies UI to display a message.
 	public void displayMessageOnScreen(Context context, String message) {
 
-		Intent intent = new Intent(Constants.DISPLAY_MESSAGE_ACTION);
-		intent.putExtra(Constants.EXTRA_MESSAGE, message);
+		Intent intent = new Intent(AppConstants.DISPLAY_MESSAGE_ACTION);
+		intent.putExtra(AppConstants.EXTRA_MESSAGE, message);
 
 		// Send Broadcast to Broadcast receiver with message
 		context.sendBroadcast(intent);

@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.google.android.gcm.GCMRegistrar;
 import com.touhiDroid.backgroundgpsgetter.service.GPSSenderService;
+import com.touhiDroid.backgroundgpsgetter.utils.AppConstants;
 
 public class MainActivity extends Activity {
 
@@ -60,8 +61,8 @@ public class MainActivity extends Activity {
 		}
 
 		// Check if GCM configuration is set
-		if (Constants.SERVER_URL == null || Constants.GOOGLE_SENDER_ID == null || Constants.SERVER_URL.length() == 0
-				|| Constants.GOOGLE_SENDER_ID.length() == 0) {
+		if (AppConstants.SERVER_URL == null || AppConstants.GOOGLE_SENDER_ID == null || AppConstants.SERVER_URL.length() == 0
+				|| AppConstants.GOOGLE_SENDER_ID.length() == 0) {
 
 			// GCM sernder id / server url is missing
 			aController.showAlertDialog(MainActivity.this, "Configuration Error!",
@@ -93,7 +94,7 @@ public class MainActivity extends Activity {
 
 				// Check if user filled the form
 				if (name.trim().length() > 0 && email.trim().length() > 0) {
-					Log.d(Constants.TAG, "Registering user: name=" + name + ", email=" + email);
+					Log.d(AppConstants.TAG, "Registering user: name=" + name + ", email=" + email);
 					registerUser();
 				} else {
 					// user doen't filled that data
@@ -110,28 +111,28 @@ public class MainActivity extends Activity {
 		// Make sure the manifest permissions was properly set
 		GCMRegistrar.checkManifest(this);
 		// Register custom Broadcast receiver to show messages on activity
-		registerReceiver(mHandleMessageReceiver, new IntentFilter(Constants.DISPLAY_MESSAGE_ACTION));
+		registerReceiver(mHandleMessageReceiver, new IntentFilter(AppConstants.DISPLAY_MESSAGE_ACTION));
 
 		// Get GCM registration id
-		Log.d(Constants.TAG, "Getting the registration id ...");
+		Log.d(AppConstants.TAG, "Getting the registration id ...");
 		final String regId = GCMRegistrar.getRegistrationId(this);
-		Log.e(Constants.TAG, "Got the registration id: " + regId);
+		Log.e(AppConstants.TAG, "Got the registration id: " + regId);
 
 		// Check if regid already presents
 		if (regId.equals("")) {
 
 			// Register with GCM
-			Log.e(Constants.TAG, "Doing a new registration for empty regId: " + regId);
-			GCMRegistrar.register(this, Constants.GOOGLE_SENDER_ID);
+			Log.e(AppConstants.TAG, "Doing a new registration for empty regId: " + regId);
+			GCMRegistrar.register(this, AppConstants.GOOGLE_SENDER_ID);
 
 		} else {
 
 			// Device is already registered on GCM Server
-			Log.e(Constants.TAG, "Device already registered with regId: " + regId);
+			Log.e(AppConstants.TAG, "Device already registered with regId: " + regId);
 			if (GCMRegistrar.isRegisteredOnServer(this)) {
 
 				// Skips registration.
-				Log.e(Constants.TAG, "Device already registered also in the server with regId: " + regId);
+				Log.e(AppConstants.TAG, "Device already registered also in the server with regId: " + regId);
 				Toast.makeText(getApplicationContext(), "Already registered with GCM Server", Toast.LENGTH_LONG).show();
 
 			} else {
@@ -140,7 +141,7 @@ public class MainActivity extends Activity {
 				// It's also necessary to cancel the thread onDestroy(),
 				// hence the use of AsyncTask instead of a raw thread.
 
-				Log.e(Constants.TAG, "Device registered, but not in the server with regId: " + regId);
+				Log.e(AppConstants.TAG, "Device registered, but not in the server with regId: " + regId);
 				final Context context = this;
 				mRegisterTask = new AsyncTask<Void, Void, Void>() {
 
@@ -149,7 +150,7 @@ public class MainActivity extends Activity {
 
 						// Register on our server
 						// On server creates a new user
-						Log.e(Constants.TAG, "mRegisterTask : doInBackground : registering: name=" + name + ", email"
+						Log.e(AppConstants.TAG, "mRegisterTask : doInBackground : registering: name=" + name + ", email"
 								+ email);
 						// TODO ID & device ID to set
 						aController.register(context, 1, email, regId);
@@ -175,10 +176,10 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			Log.d(Constants.TAG, "mHandleMessageReceiver : msg received.");
+			Log.d(AppConstants.TAG, "mHandleMessageReceiver : msg received.");
 
-			String newMessage = intent.getExtras().getString(Constants.EXTRA_MESSAGE);
-			Log.d(Constants.TAG, "mHandleMessageReceiver : msg:" + newMessage);
+			String newMessage = intent.getExtras().getString(AppConstants.EXTRA_MESSAGE);
+			Log.d(AppConstants.TAG, "mHandleMessageReceiver : msg:" + newMessage);
 
 			// Waking up mobile if it is sleeping
 			aController.acquireWakeLock(getApplicationContext());
