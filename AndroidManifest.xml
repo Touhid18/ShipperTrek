@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.touhiDroid.backgroundgpsgetter"
+    package="com.shippertrek.ShipperTrek"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    
+
     <!-- GCM requires a Google account. -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
 
@@ -34,21 +34,20 @@
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
-        android:name="com.touhiDroid.backgroundgpsgetter.GCMController"
+        android:name="com.shippertrek.ShipperTrek.GCMController"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <service
-            android:name="com.touhiDroid.backgroundgpsgetter.service.GPSSenderService"
+            android:name="com.toucom.shippertrek.ShipperTrek.service.GPSSenderService"
             android:icon="@drawable/ic_launcher"
             android:label="@string/app_name" >
         </service>
-        <service android:name=".GCMIntentService" />
+        <service android:name="com.shippertrek.ShipperTrek.GCMIntentService" />
 
         <receiver
-            android:name="com.touhiDroid.backgroundgpsgetter.service.LocationUpdateReceiver"
-            tools:ignore="ExportedReceiver" >
+            android:name="com.touhiDroidcom.shippertrek.ShipperTrek.service.LocationUpdateReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="com.touhiDroid.LocationUpdateAction" />
@@ -69,7 +68,7 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name="com.touhiDroid.backgroundgpsgetter.MainActivity" >
+        <activity android:name="com.shippertrek.ShipperTrek.MainActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
